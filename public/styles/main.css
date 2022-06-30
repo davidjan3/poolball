@@ -1,0 +1,86 @@
+@font-face {
+  font-family: "ShareTechMono";
+  src: URL("ShareTechMono-Regular.ttf") format("truetype");
+}
+
+* {
+  font-family: "ShareTechMono";
+}
+
+body {
+  background-color: #10101a;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+button,
+span,
+input {
+  display: inline-block;
+  color: white;
+  text-align: center;
+  font-size: 24;
+  border-radius: 0.5rem;
+  outline: none;
+  border: none;
+  margin: 0.5rem;
+}
+
+input {
+  background-color: #20202a;
+}
+
+button {
+  background-color: #109010;
+}
+
+button:hover,
+input:hover {
+  filter: brightness(1.4);
+}
+
+button:active,
+input:active {
+  filter: brightness(0.95);
+}
+
+#create,
+#or {
+  width: 20rem;
+}
+
+#join {
+  width: 9rem;
+}
+
+#room {
+  width: 10rem;
+}
+
+#hint {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+}
+
+#canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  width: min(100%, 100rem);
+  aspect-ratio: 2 / 1;
+  background-color: #07070a;
+}

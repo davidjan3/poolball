@@ -1,0 +1,26 @@
+{
+  "name": "poolball",
+  "version": "1.0.0",
+  "description": "Pool and soccer combined :)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidjan3/poolball.git"
+  },
+  "author": "davidjan3",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/davidjan3/poolball/issues"
+  },
+  "homepage": "https://github.com/davidjan3/poolball#readme",
+  "dependencies": {
+    "express": "^4.18.1",
+    "matterjs": "^0.1.3",
+    "poly-decomp": "^0.3.0",
+    "socket.io": "^4.5.1"
+  },
+  "devDependencies": {}
+}

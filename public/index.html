@@ -1,0 +1,29 @@
+<html>
+
+<head>
+  <link rel="stylesheet" href="styles/main.css">
+  <script src="src/main.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <div><button id="create">CREATE ROOM</button></div>
+    <div><span id="or">OR</span></div>
+    <div><button id="join">JOIN</button><input id="room" maxlength="5" placeholder="00000" /></div>
+  </div>
+  <span id="hint"></span>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error") == "invalid_room") setHint("Room code invalid.", 1);
+
+    const create = document.getElementById("create");
+    const join = document.getElementById("join");
+    const room = document.getElementById("room");
+
+    create.onclick = () => window.location.href = "/room/new";
+    join.onclick = () => window.location.href = "/room/" + room.value;
+  </script>
+</body>
+
+</html>

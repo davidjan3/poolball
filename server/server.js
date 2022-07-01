@@ -49,30 +49,38 @@ io.on("connection", (socket) => {
   console.log("Attempt to connect to: " + roomCode);
   if (roomCode.length == roomCodeLen && rooms.has(roomCode)) {
     let room = rooms.get(roomCode);
-    if (room.players.length < 2) {
-      console.log("Player connected to: " + roomCode);
-      room.players.push(socket.id);
-    } else {
-      console.log("Spectator connected to: " + roomCode);
-      room.spectators.push(socket.id);
-    }
-    socket.emit(IO_MATCH, room);
+    room.players.push(socket.id);
+    console.log("Player connected: " + roomCode);
+    console.log("Players: " + room.players);
+    room.players.forEach((id) => io.sockets.sockets.get(id).emit(IO_MATCH, room));
+
+    socket.on("disconnect", () => {
+      room.players = room.players.filter((id) => id != socket.id);
+      console.log("Player disconnected: " + roomCode);
+      console.log("Players: " + room.players);
+      if (room.players.length == 0) {
+        rooms.delete(roomCode);
+        console.log("Room deleted: " + roomCode);
+      } else {
+        room.players.forEach((id) => io.sockets.sockets.get(id).emit(IO_MATCH, room));
+      }
+    });
 
     socket.on(IO_MATCH, (match) => {
       console.log("Match received");
-      if (room.moving && !match.moving && room.players[room.turn] == socket.id) {
+      if ((room.moving || room.ballCoords.length == 0) && !match.moving && room.players[room.turn] == socket.id) {
         console.log("Match loaded");
         room = match;
         rooms.set(roomCode, room);
-        room.turn = (room.turn + 1) % 2;
-        [...room.players, ...room.spectators].forEach((id) => io.sockets.sockets.get(id).emit(IO_MATCH, room));
+        if (room.ballCoords.length != 0) room.turn = (room.turn + 1) % 2;
+        room.players.forEach((id) => io.sockets.sockets.get(id).emit(IO_MATCH, room));
       }
     });
 
     socket.on(IO_AIM, (move) => {
       //move = [x, y]
       if (!room.moving && room.players[room.turn] == socket.id) {
-        [...room.players, ...room.spectators].forEach((id) => {
+        room.players.forEach((id) => {
           if (id != socket.id) {
             io.sockets.sockets.get(id).emit(IO_AIM, move);
           }
@@ -83,7 +91,7 @@ io.on("connection", (socket) => {
     socket.on(IO_MOVE, (move) => {
       //move = [x, y]
       if (!room.moving && room.players[room.turn] == socket.id) {
-        [...room.players, ...room.spectators].forEach((id) => {
+        room.players.forEach((id) => {
           if (id != socket.id) {
             io.sockets.sockets.get(id).emit(IO_MOVE, move);
           }
@@ -108,12 +116,10 @@ function generateRoomName() {
 }
 
 class Room {
-  players = []; //fill up until len = 2
-  turn = 0; //index or players
+  players = []; //unlimited, first two play, others spectate
+  turn = 0; //index of player who aims
   moving = false; //true after IO_MOVE until IO_MATCH with moving = false
-  spectators = []; //fill up once players.len = 2
-  player0 = []; //x, y, r
-  player1 = []; //x, y, r
-  ball = []; //x, y, r
+  playerCoords = []; //[x, y, r], ...
+  ballCoords = []; //x, y, r
   score = [0, 0]; //player0, player1
 }

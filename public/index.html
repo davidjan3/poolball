@@ -23,6 +23,8 @@
 
     create.onclick = () => window.location.href = "/room/new";
     join.onclick = () => window.location.href = "/room/" + room.value;
+    room.oninput = () => room.value = room.value.toUpperCase();
+    room.onkeydown = (evt) => evt.keyCode == 13 ? window.location.href = "/room/" + room.value : null;
   </script>
 </body>
 

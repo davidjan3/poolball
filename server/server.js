@@ -22,18 +22,18 @@ const addr = path.join(__dirname, "../public/");
 app.use(express.static(addr));
 app.use("/modules/", express.static(path.join(__dirname, "../node_modules/")));
 app.get("/room/:id", (req, res) => {
-  if (req.params.id === "new") {
+  if (req.params.id?.toLowerCase() == "new") {
     let id = generateRoomName();
     console.log("New room: " + id);
     rooms.set(id, new Room());
     res.redirect("/room/" + id);
     return;
-  } else if (!rooms.has(req.params.id)) {
+  } else if (!rooms.has(req.params.id?.toUpperCase())) {
     res.redirect("/index.html?error=invalid_room");
-    console.log("Invalid room: " + req.params.id);
+    console.log("Invalid room: " + req.params.id?.toUpperCase());
     return;
   }
-  console.log("Joining room: " + req.params.id);
+  console.log("Joining room: " + req.params.id?.toUpperCase());
   res.sendFile(path.join(addr, "room.html"));
 });
 app.get("*", (req, res) => {
@@ -45,7 +45,7 @@ app.get("/", (req, res) => {
 
 io.on("connection", (socket) => {
   const url = socket.request.headers.referer.split("/");
-  const roomCode = url ? url[url.length - 1] : null;
+  const roomCode = (url ? url[url.length - 1] : null)?.toUpperCase();
   console.log("Attempt to connect to: " + roomCode);
   if (roomCode.length == roomCodeLen && rooms.has(roomCode)) {
     let room = rooms.get(roomCode);
@@ -70,18 +70,24 @@ io.on("connection", (socket) => {
       console.log("Match received");
       if ((room.moving || room.ballCoords.length == 0) && !match.moving && room.players[room.turn] == socket.id) {
         console.log("Match loaded");
-        room = match;
+        room.turn = match.turn;
+        room.moving = match.moving;
+        room.playerCoords = match.playerCoords;
+        room.ballCoords = match.ballCoords;
+        room.score = match.score;
         rooms.set(roomCode, room);
-        if (room.ballCoords.length != 0) room.turn = (room.turn + 1) % 2;
         room.players.forEach((id) => io.sockets.sockets.get(id).emit(IO_MATCH, room));
       }
     });
 
     socket.on(IO_AIM, (move) => {
-      //move = [x, y]
+      console.log("Aim received");
+      console.log(!room.moving, room.players[room.turn] == socket.id);
       if (!room.moving && room.players[room.turn] == socket.id) {
+        console.log("Aim loaded");
         room.players.forEach((id) => {
           if (id != socket.id) {
+            console.log(id);
             io.sockets.sockets.get(id).emit(IO_AIM, move);
           }
         });
@@ -89,8 +95,11 @@ io.on("connection", (socket) => {
     });
 
     socket.on(IO_MOVE, (move) => {
-      //move = [x, y]
+      console.log("Move received");
+      console.log(!room.moving, room.players[room.turn] == socket.id);
       if (!room.moving && room.players[room.turn] == socket.id) {
+        console.log("Move loaded");
+        room.moving = true;
         room.players.forEach((id) => {
           if (id != socket.id) {
             io.sockets.sockets.get(id).emit(IO_MOVE, move);

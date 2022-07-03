@@ -20,6 +20,8 @@ let room;
 
 Matter.Common._seed = 13371337;
 Matter.Resolver._restingThresh = 0.001;
+Matter.Sleeping._motionSleepThreshold = 0.02;
+Matter.Sleeping._motionWakeThreshold = 0.08;
 
 var engine = Engine.create();
 engine.world.gravity.y = 0;
@@ -28,7 +30,7 @@ engine.enableSleeping = true;
 //settings:
 const playerSize = 20;
 const ballSize = 30;
-const ballPhysics = { friction: 0.0, frictionAir: 0.004, restitution: 1.0, sleepThreshold: 400 };
+const ballPhysics = { friction: 0.0, frictionAir: 0.004, frictionStatic: 0, restitution: 1.0, sleepThreshold: 200 };
 const maxDrag = 120;
 const maxForce = 0.015;
 
@@ -156,7 +158,6 @@ const ballDensity = 1 / (Math.PI * Math.pow(ballSize / 2, 2));
     },
   });
   Composite.add(engine.world, [...players, ball]);
-  //setTimeout(() => Body.applyForce(player0, player0.position, vectify([force * 15, force * 15])), 1000);
 }
 
 loadDefault();
@@ -244,6 +245,7 @@ socket.on(IO_MATCH, (match) => {
     loadRoom();
     console.log("Match loaded");
   }
+  //setTimeout(() => loadMove([20, 0], 100));
 });
 
 socket.on(IO_AIM, (move) => {

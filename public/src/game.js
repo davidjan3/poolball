@@ -26,11 +26,11 @@ engine.world.gravity.y = 0;
 engine.enableSleeping = true;
 
 //settings:
-const playerSize = 30;
-const ballSize = 40;
+const playerSize = 20;
+const ballSize = 30;
 const ballPhysics = { friction: 0.0, frictionAir: 0.004, restitution: 1.0, sleepThreshold: 400 };
-const maxDrag = 80;
-const maxForce = 0.008;
+const maxDrag = 120;
+const maxForce = 0.015;
 
 //colors:
 const backgroundColor = "rgb(8,8,12)";

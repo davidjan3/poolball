@@ -32,12 +32,13 @@ const playerSize = 20;
 const ballSize = 30;
 const ballPhysics = { friction: 0.0, frictionAir: 0.0075, frictionStatic: 0, restitution: 1.0, sleepThreshold: 200 };
 const maxDrag = 120;
-const maxForce = 0.025;
+const maxForce = 0.035;
 
 //colors:
 const backgroundColor = "rgb(8,8,12)";
 const mapColor = "rgb(160,160,160)";
-const goalColor = "rgb(200,200,200)";
+const playerGoalColor = "rgb(50,50,100)";
+const enemyGoalColor = "rgb(100,50,50)";
 const playerColor = "rgb(120,120,240)";
 const enemyColor = "rgb(240,120,120)";
 const activeColor = "white";
@@ -65,6 +66,7 @@ var render = Render.create({
   },
 });
 
+let goalL, goalR;
 {
   let verticesTop = arrVectify([
     [margin, margin],
@@ -96,25 +98,25 @@ var render = Render.create({
     },
   });
   Body.translate(bottom, { x: 0, y: 500 - margin - bottom.bounds.max.y });
-  let goalL = Bodies.rectangle(margin + borderSize / 2, 250, borderSize, goalWidth, {
+  goalL = Bodies.rectangle(margin + borderSize / 2, 250, borderSize, goalWidth, {
     isStatic: true,
     restitution: 1.0,
     collisionFilter: {
       group: -1,
     },
     render: {
-      fillStyle: goalColor,
+      fillStyle: mapColor,
       lineWidth: 0,
     },
   });
-  let goalR = Bodies.rectangle(1000 - (margin + borderSize / 2), 250, borderSize, goalWidth, {
+  goalR = Bodies.rectangle(1000 - (margin + borderSize / 2), 250, borderSize, goalWidth, {
     isStatic: true,
     restitution: 1.0,
     collisionFilter: {
       group: -1,
     },
     render: {
-      fillStyle: goalColor,
+      fillStyle: mapColor,
       lineWidth: 0,
     },
   });
@@ -282,6 +284,9 @@ Events.on(runner, "afterUpdate", () => {
 });
 
 const start = Date.now();
+/*setInterval(function () {
+  Engine.update(engine, 1000 / 60);
+}, 1000 / 60);*/
 setInterval(() => {
   Runner.tick(runner, engine, Date.now() - start);
 }, 1000 / 60);
@@ -352,6 +357,8 @@ function loadRoom() {
     p.render.lineWidth = i == room.turn ? 5 : 0;
     p.render.fillStyle = i == player ? playerColor : enemyColor;
   });
+  goalL.render.fillStyle = player % 2 == 0 ? playerGoalColor : enemyGoalColor;
+  goalR.render.fillStyle = player % 2 == 1 ? playerGoalColor : enemyGoalColor;
   scoreL.innerText = room.score[0];
   scoreR.innerText = room.score[1];
 }

@@ -37,7 +37,7 @@ const maxForce = 0.025;
 //colors:
 const backgroundColor = "rgb(8,8,12)";
 const mapColor = "rgb(160,160,160)";
-const goalColor = "rgb(200,200,200)";
+const goalColor = "rgb(80,80,84)";
 const playerColor = "rgb(120,120,240)";
 const enemyColor = "rgb(240,120,120)";
 const activeColor = "white";
@@ -254,7 +254,7 @@ socket.on(IO_MOVE, (move) => {
   loadMove(move);
 });
 
-const runner = Runner.create({ fps: 60 });
+const runner = Runner.create({ fps: 30 });
 
 Events.on(runner, "afterUpdate", () => {
   if (room && room.moving && room.turn == player) {
@@ -284,7 +284,7 @@ Events.on(runner, "afterUpdate", () => {
 const start = Date.now();
 setInterval(() => {
   Runner.tick(runner, engine, Date.now() - start);
-}, 1000 / 60);
+}, 1000 / 30);
 
 function loadAim([x, y]) {
   aiming = [x, y];

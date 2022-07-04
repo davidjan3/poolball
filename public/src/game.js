@@ -20,7 +20,7 @@ let room;
 
 Matter.Common._seed = 13371337;
 Matter.Resolver._restingThresh = 0.001;
-Matter.Sleeping._motionSleepThreshold = 0.02;
+Matter.Sleeping._motionSleepThreshold = 0.12;
 Matter.Sleeping._motionWakeThreshold = 0.08;
 
 var engine = Engine.create();
@@ -30,9 +30,9 @@ engine.enableSleeping = true;
 //settings:
 const playerSize = 20;
 const ballSize = 30;
-const ballPhysics = { friction: 0.0, frictionAir: 0.004, frictionStatic: 0, restitution: 1.0, sleepThreshold: 200 };
+const ballPhysics = { friction: 0.0, frictionAir: 0.0075, frictionStatic: 0, restitution: 1.0, sleepThreshold: 200 };
 const maxDrag = 120;
-const maxForce = 0.015;
+const maxForce = 0.025;
 
 //colors:
 const backgroundColor = "rgb(8,8,12)";
@@ -164,8 +164,6 @@ loadDefault();
 
 Render.run(render);
 
-var runner = Runner.create();
-
 //mouse:
 {
   let mouse = Mouse.create(render.canvas),
@@ -187,7 +185,6 @@ var runner = Runner.create();
     if (mouseConstraint.body) {
       console.log(player, mouseConstraint.body == players[player], !room.moving);
       if (player > -1 && mouseConstraint.body == players[player] && !room.moving && room.turn == player) {
-        console.log("moving");
         moved = mouseConstraint.body;
         let drag = scaleDrag([moved.position.x - mouse.position.x, moved.position.y - mouse.position.y]);
         socket.emit(IO_AIM, drag);
@@ -195,7 +192,7 @@ var runner = Runner.create();
         return;
       }
     }
-    moved = null;
+    //moved = null;
   });
 
   Events.on(mouseConstraint, "mouseup", (event) => {
@@ -245,7 +242,6 @@ socket.on(IO_MATCH, (match) => {
     loadRoom();
     console.log("Match loaded");
   }
-  //setTimeout(() => loadMove([20, 0], 100));
 });
 
 socket.on(IO_AIM, (move) => {
@@ -257,6 +253,8 @@ socket.on(IO_MOVE, (move) => {
   console.log("Move received");
   loadMove(move);
 });
+
+const runner = Runner.create({ fps: 60 });
 
 Events.on(runner, "afterUpdate", () => {
   if (room && room.moving && room.turn == player) {
@@ -283,7 +281,10 @@ Events.on(runner, "afterUpdate", () => {
   }
 });
 
-Runner.run(runner, engine);
+const start = Date.now();
+setInterval(() => {
+  Runner.tick(runner, engine, Date.now() - start);
+}, 1000 / 60);
 
 function loadAim([x, y]) {
   aiming = [x, y];

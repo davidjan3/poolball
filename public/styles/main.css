@@ -8,11 +8,13 @@
 }
 
 body {
+  position: absolute;
   background-color: rgba(16, 16, 26);
   width: 100%;
   height: 100%;
   margin: 0;
   padding: 0;
+  pointer-events: all;
 }
 
 .container {
@@ -72,6 +74,8 @@ input:active {
   bottom: 0;
   width: 100%;
   text-align: center;
+  pointer-events: none;
+  user-select: none;
 }
 
 #canvas {
@@ -83,10 +87,14 @@ input:active {
   width: min(100%, 100rem);
   aspect-ratio: 2 / 1;
   background-color: rgba(7, 7, 10);
+  pointer-events: none;
+  pointer-events: none;
+  user-select: none;
 }
 
 #scoreContainer {
   position: fixed;
+  z-index: 1000;
   top: 0;
   -webkit-transform: translate(-50%, 0);
   transform: translate(-50%, 0);
@@ -97,6 +105,8 @@ input:active {
   padding: 0;
   background-color: rgb(8, 8, 12);
   white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
 }
 
 #scoreL,
@@ -112,6 +122,9 @@ input:active {
   text-align: center;
   line-height: 5rem;
   font-size: 2rem;
+  pointer-events: none;
+  pointer-events: none;
+  user-select: none;
 }
 
 #scoreDel {

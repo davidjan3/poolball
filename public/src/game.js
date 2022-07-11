@@ -28,11 +28,12 @@ engine.world.gravity.y = 0;
 engine.enableSleeping = true;
 
 //settings:
+const fps = 40;
 const playerSize = 20;
 const ballSize = 30;
 const ballPhysics = { friction: 0.0, frictionAir: 0.0075, frictionStatic: 0, restitution: 1.0, sleepThreshold: 200 };
 const maxDrag = 120;
-const maxForce = 0.035;
+const maxForce = 0.035 * (fps / 60);
 
 //colors:
 const backgroundColor = "rgb(8,8,12)";
@@ -168,16 +169,19 @@ Render.run(render);
 
 //mouse:
 {
-  let mouse = Mouse.create(render.canvas),
-    mouseConstraint = MouseConstraint.create(engine, {
-      mouse: mouse,
-      constraint: {
-        stiffness: 0.0,
-        render: {
-          visible: debug,
-        },
+  const mouse = Mouse.create(document.body);
+  updateMouseOffset(mouse);
+  window.addEventListener("resize", () => updateMouseOffset(mouse), true);
+
+  const mouseConstraint = MouseConstraint.create(engine, {
+    mouse: mouse,
+    constraint: {
+      stiffness: 0.0,
+      render: {
+        visible: debug,
       },
-    });
+    },
+  });
 
   Composite.add(engine.world, mouseConstraint);
 
@@ -185,7 +189,6 @@ Render.run(render);
 
   Events.on(mouseConstraint, "mousemove", (event) => {
     if (mouseConstraint.body) {
-      console.log(player, mouseConstraint.body == players[player], !room.moving);
       if (player > -1 && mouseConstraint.body == players[player] && !room.moving && room.turn == player) {
         moved = mouseConstraint.body;
         let drag = scaleDrag([moved.position.x - mouse.position.x, moved.position.y - mouse.position.y]);
@@ -256,7 +259,7 @@ socket.on(IO_MOVE, (move) => {
   loadMove(move);
 });
 
-const runner = Runner.create({ fps: 60 });
+const runner = Runner.create({ fps: fps });
 
 Events.on(runner, "afterUpdate", () => {
   if (room && room.moving && room.turn == player) {
@@ -289,7 +292,23 @@ const start = Date.now();
 }, 1000 / 60);*/
 setInterval(() => {
   Runner.tick(runner, engine, Date.now() - start);
-}, 1000 / 60);
+}, 1000 / fps);
+
+function updateMouseOffset(mouse) {
+  x0 = canvas.offsetLeft - canvas.offsetWidth / 2;
+  y0 = canvas.offsetTop - canvas.offsetHeight / 2;
+  setMouseBounds(mouse, { x0: x0, y0: y0, x1: x0 + canvas.offsetWidth, y1: y0 + canvas.offsetHeight });
+}
+
+function setMouseBounds(mouse, { x0, y0, x1, y1 }) {
+  const sx = 1000 / canvas.offsetWidth;
+  const sy = 500 / canvas.offsetHeight;
+  Mouse.setScale(mouse, { x: sx, y: sy });
+  Mouse.setOffset(mouse, {
+    x: -x0 * sx,
+    y: -y0 * sy,
+  });
+}
 
 function loadAim([x, y]) {
   aiming = [x, y];
@@ -347,11 +366,11 @@ function loadRoom() {
   if (room.ballCoords.length != 0) {
     let c = room.ballCoords;
     Body.setPosition(ball, { x: c[0], y: c[1] });
-    Body.setAngle(ball, c[2]);
+    //Body.setAngle(ball, c[2]);
   }
   room.playerCoords.forEach((c, i) => {
     Body.setPosition(players[i], { x: c[0], y: c[1] });
-    Body.setAngle(players[i], c[2]);
+    //Body.setAngle(players[i], c[2]);
   });
   players.forEach((p, i) => {
     p.render.lineWidth = i == room.turn ? 5 : 0;
@@ -364,6 +383,7 @@ function loadRoom() {
 }
 
 function saveRoom() {
+  stopMoving();
   aiming = null;
   room.ballCoords = [ball.position.x, ball.position.y, ball.angle];
   room.playerCoords = players.map((p) => [p.position.x, p.position.y, p.angle]);
